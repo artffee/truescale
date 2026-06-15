@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Online Ruler — Actual Size in cm &amp; inches | TrueScale</title>
+<meta name="description" content="A free, accurate on-screen ruler. Calibrate once with any credit card and measure real objects in centimetres and inches, right in your browser. No install, works offline." />
+<meta name="theme-color" content="#0d0e12" />
+<link rel="canonical" href="https://truescale.app/" />
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<link rel="manifest" href="manifest.webmanifest" />
+<meta property="og:title" content="TrueScale — Online Ruler, Actual Size in cm &amp; inches" />
+<meta property="og:description" content="Calibrate with a credit card, then measure any object held against your screen. Fully client-side, no backend." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://truescale.app/" />
+<!-- Google AdSense loader — async, never blocks the tool. Replace ca-pub-XXXXXXXXXXXXXXXX with your publisher ID. -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+<style>
+  :root{
+    --bg:#0d0e12;
+    --bg-soft:#15171d;
+    --bg-card:#181a21;
+    --line:#262932;
+    --line-soft:#1f222a;
+    --text:#f3f4f6;
+    --text-dim:#a6adbb;
+    --text-faint:#6b7280;
+    --accent:#f5a623;
+    --accent-bright:#ffb732;
+    --accent-soft:rgba(245,166,35,.12);
+    --radius:14px;
+    --mono:"SF Mono",ui-monospace,"JetBrains Mono","Roboto Mono",Menlo,Consolas,monospace;
+    --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--bg);color:var(--text);
+    font-family:var(--sans);line-height:1.6;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  }
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  h1,h2,h3{line-height:1.15;letter-spacing:-.02em;font-weight:700}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.32em;text-transform:uppercase;
+    color:var(--accent);margin:0 0 18px;
+  }
+
+  /* ---- Top bar ---- */
+  header.nav{
+    position:sticky;top:0;z-index:50;
+    backdrop-filter:saturate(160%) blur(12px);
+    background:rgba(13,14,18,.78);
+    border-bottom:1px solid var(--line-soft);
+  }
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:62px;position:relative}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;letter-spacing:-.02em}
+  .brand .glyph{
+    width:26px;height:26px;border-radius:7px;display:grid;place-items:center;
+    background:linear-gradient(150deg,var(--accent-bright),var(--accent));color:#1a1206;
+    font-family:var(--mono);font-weight:800;font-size:15px;
+  }
+  .nav-links{display:flex;gap:26px;font-size:14px;color:var(--text-dim)}
+  .nav-links a{color:var(--text-dim)}
+  .nav-links a:hover{color:var(--text);text-decoration:none}
+  .menu-btn{display:none;background:transparent;border:1px solid var(--line);border-radius:9px;color:var(--text);width:40px;height:38px;cursor:pointer;align-items:center;justify-content:center}
+  @media(max-width:680px){
+    .menu-btn{display:inline-flex}
+    .nav-links{
+      position:absolute;top:62px;right:0;left:0;flex-direction:column;gap:0;
+      background:var(--bg-soft);border:1px solid var(--line-soft);border-radius:0 0 12px 12px;
+      padding:6px;display:none;
+    }
+    .nav-links.open{display:flex}
+    .nav-links a{padding:12px 14px;border-radius:8px}
+    .nav-links a:hover{background:var(--bg-card)}
+  }
+
+  /* ---- Hero ---- */
+  .hero{padding:74px 0 36px;position:relative;overflow:hidden}
+  .hero::before{
+    content:"";position:absolute;inset:-40% 30% auto -10%;height:520px;
+    background:radial-gradient(closest-side,rgba(245,166,35,.14),transparent 70%);
+    pointer-events:none;
+  }
+  .hero h1{font-size:clamp(40px,7vw,68px);margin:0 0 18px}
+  .hero p.lead{font-size:clamp(17px,2.4vw,20px);color:var(--text-dim);max-width:620px;margin:0 0 30px}
+  .cta-row{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+  .btn{
+    display:inline-flex;align-items:center;gap:9px;font-weight:600;font-size:15px;
+    padding:13px 22px;border-radius:11px;cursor:pointer;border:1px solid transparent;
+    transition:transform .12s ease,background .15s ease,border-color .15s ease;font-family:var(--sans);
+  }
+  .btn:hover{text-decoration:none;transform:translateY(-1px)}
+  .btn-primary{background:linear-gradient(150deg,var(--accent-bright),var(--accent));color:#1a1206}
+  .btn-ghost{background:transparent;border-color:var(--line);color:var(--text)}
+  .btn-ghost:hover{border-color:#3a3e49;background:var(--bg-soft)}
+  .trust{display:flex;gap:22px;flex-wrap:wrap;margin-top:34px;font-size:13px;color:var(--text-faint)}
+  .trust span{display:inline-flex;align-items:center;gap:7px}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block}
+
+  /* ---- Tool panel ---- */
+  .tool-section{padding:8px 0 56px}
+  .panel{
+    background:linear-gradient(180deg,var(--bg-card),#141620);
+    border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:0 24px 60px -30px rgba(0,0,0,.8);
+    overflow:hidden;
+  }
+  .toolbar{
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+    padding:16px 20px;border-bottom:1px solid var(--line-soft);
+    background:rgba(255,255,255,.012);
+  }
+  .seg{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:3px}
+  .seg button{
+    font-family:var(--sans);font-weight:600;font-size:14px;color:var(--text-dim);
+    background:transparent;border:0;padding:8px 18px;border-radius:7px;cursor:pointer;transition:.15s;
+  }
+  .seg button[aria-pressed="true"]{background:var(--accent);color:#1a1206}
+  .toolbar .spacer{flex:1}
+  .tool-btn{
+    font-family:var(--sans);font-weight:600;font-size:13.5px;color:var(--text);
+    background:var(--bg-soft);border:1px solid var(--line);border-radius:9px;
+    padding:9px 15px;cursor:pointer;display:inline-flex;gap:8px;align-items:center;transition:.15s;
+  }
+  .tool-btn:hover{border-color:#3a3e49;background:#1d2029}
+  .cal-flag{
+    font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;color:var(--text-faint);
+    display:inline-flex;align-items:center;gap:7px;
+  }
+  .cal-flag.approx{color:var(--accent)}
+  .cal-flag .pip{width:7px;height:7px;border-radius:50%;background:#3aca7a;box-shadow:0 0 0 3px rgba(58,202,122,.15)}
+  .cal-flag.approx .pip{background:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+
+  /* readout */
+  .readout{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;padding:22px 24px 6px}
+  .readout .primary{font-family:var(--mono);font-weight:700;font-size:clamp(40px,8vw,62px);color:var(--accent);letter-spacing:-.02em;line-height:1}
+  .readout .primary .u{font-size:.34em;color:var(--text-dim);margin-left:8px;letter-spacing:.05em}
+  .readout .secondary{font-family:var(--mono);font-size:14px;color:var(--text-faint);display:flex;gap:18px;flex-wrap:wrap}
+  .readout .secondary b{color:var(--text-dim);font-weight:600}
+
+  /* ruler */
+  .ruler-stage{position:relative;padding:14px 24px 30px;user-select:none;-webkit-user-select:none;touch-action:pan-y}
+  .ruler-host{position:relative;width:100%;height:150px}
+  .ruler-host svg{display:block;width:100%;height:100%}
+  .tick{stroke:#5b616e;stroke-width:1}
+  .tick.major{stroke:var(--text);stroke-width:1.4}
+  .tick.medium{stroke:#878d9a}
+  .tick-label{fill:var(--text-dim);font-family:var(--mono);font-size:12px}
+  .baseline{stroke:#3a3e49;stroke-width:1.5}
+
+  .caliper-span{position:absolute;top:6px;bottom:22px;background:var(--accent-soft);border-left:1px dashed rgba(245,166,35,.4);border-right:1px dashed rgba(245,166,35,.4);pointer-events:none}
+  .marker{position:absolute;top:0;bottom:0;width:0;cursor:grab;touch-action:none;z-index:2}
+  .marker:active{cursor:grabbing}
+  .marker .stem{position:absolute;top:0;bottom:0;left:-1px;width:2px;background:var(--accent)}
+  .marker .jaw{
+    position:absolute;top:-2px;left:50%;transform:translateX(-50%);
+    width:26px;height:26px;border-radius:8px;
+    background:linear-gradient(150deg,var(--accent-bright),var(--accent));color:#1a1206;
+    display:grid;place-items:center;font-family:var(--mono);font-weight:800;font-size:13px;
+    box-shadow:0 4px 14px -4px rgba(245,166,35,.7);
+  }
+  .marker:focus{outline:none}
+  .marker:focus-visible .jaw{outline:3px solid #fff;outline-offset:2px}
+  .marker .badge{position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:10.5px;color:var(--text-faint);white-space:nowrap}
+  .hint{font-family:var(--mono);font-size:11.5px;color:var(--text-faint);padding:0 24px 18px;margin-top:-8px}
+
+  /* ---- Calibration dialog ---- */
+  dialog{
+    border:1px solid var(--line);background:var(--bg-card);color:var(--text);
+    border-radius:var(--radius);padding:0;width:calc(100vw - 28px);max-width:720px;
+    box-shadow:0 40px 90px -30px rgba(0,0,0,.9);
+  }
+  dialog::backdrop{background:rgba(6,7,10,.66);backdrop-filter:blur(3px)}
+  .dlg-head{padding:22px 24px 6px}
+  .dlg-head h3{margin:0 0 8px;font-size:21px}
+  .dlg-head p{margin:0;color:var(--text-dim);font-size:14.5px}
+  .dlg-body{padding:16px 24px 4px}
+  .edge-toggle{margin-bottom:8px}
+  .edge-toggle button{font-size:13px;padding:8px 14px}
+  .edge-hint{margin:2px 0 14px;font-size:13px;color:var(--text-faint)}
+  .card-strip{
+    position:relative;width:100%;overflow-x:auto;overflow-y:hidden;
+    background:repeating-linear-gradient(45deg,#101218,#101218 10px,#0e1015 10px,#0e1015 20px);
+    border-radius:12px;border:1px solid var(--line-soft);padding:22px 0;
+    display:flex;align-items:center;min-height:150px;
+  }
+  .credit-card{
+    position:relative;height:95px;flex:0 0 auto;margin-left:18px;
+    border-radius:10px;border:2px solid var(--accent);
+    background:linear-gradient(135deg,rgba(245,166,35,.16),rgba(245,166,35,.04));
+    display:flex;align-items:flex-end;padding:10px;
+  }
+  .credit-card::before{content:"";position:absolute;top:12px;left:12px;width:34px;height:26px;border-radius:5px;background:linear-gradient(135deg,#d9b25a,#a07d2e)}
+  .cc-dim{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:.08em}
+  .resize-handle{
+    position:absolute;top:0;right:-13px;bottom:0;width:26px;cursor:ew-resize;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .resize-handle::after{content:"";width:6px;height:46px;border-radius:4px;background:var(--accent);box-shadow:0 0 0 4px rgba(245,166,35,.18)}
+  .slider-row{display:flex;align-items:center;gap:14px;margin:16px 0 6px}
+  .slider-row label{font-size:13px;color:var(--text-dim);white-space:nowrap}
+  input[type=range]{flex:1;accent-color:var(--accent);height:6px}
+  .ppi-readout{font-family:var(--mono);font-size:13px;color:var(--text-dim);white-space:nowrap}
+  .ppi-readout b{color:var(--accent)}
+  .ppi-entry{display:flex;align-items:center;gap:10px;margin-top:6px;font-size:13.5px;color:var(--text-dim);flex-wrap:wrap}
+  .ppi-entry input{width:90px;background:var(--bg);border:1px solid var(--line);color:var(--text);font-family:var(--mono);padding:8px 10px;border-radius:8px;font-size:13px}
+  .dlg-foot{display:flex;gap:10px;justify-content:flex-end;padding:16px 24px 22px;flex-wrap:wrap}
+
+  /* ---- Ad slots (reserved, no CLS) ---- */
+  .ad-slot{
+    position:relative;margin:0 auto;border:1px dashed var(--line);border-radius:12px;
+    display:grid;place-items:center;color:var(--text-faint);
+    font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+    background:var(--bg-soft);overflow:hidden;
+  }
+  .ad-slot .ad-ph{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;z-index:0}
+  .ad-slot ins{position:relative;z-index:1}
+  .ad-leader{width:100%;max-width:728px;height:90px;margin-top:30px}
+  .ad-anchor{
+    position:fixed;left:50%;bottom:0;transform:translateX(-50%);
+    width:100%;max-width:760px;height:60px;z-index:40;
+    border-radius:12px 12px 0 0;background:rgba(21,23,29,.96);backdrop-filter:blur(8px);
+    border:1px solid var(--line);border-bottom:0;
+  }
+  .ad-anchor .close{
+    position:absolute;top:6px;right:8px;background:transparent;border:0;color:var(--text-faint);
+    font-size:16px;cursor:pointer;line-height:1;padding:4px;
+  }
+  .ad-anchor .close:hover{color:var(--text)}
+
+  /* ---- Content ---- */
+  section.content{padding:30px 0}
+  .grid{display:grid;gap:22px}
+  .grid.cols-3{grid-template-columns:repeat(3,1fr)}
+  .grid.cols-2{grid-template-columns:repeat(2,1fr)}
+  @media(max-width:760px){.grid.cols-3,.grid.cols-2{grid-template-columns:1fr}}
+  .feature{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);padding:22px}
+  .feature .ico{width:38px;height:38px;border-radius:10px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;margin-bottom:14px}
+  .feature h3{font-size:17px;margin:0 0 8px}
+  .feature p{margin:0;color:var(--text-dim);font-size:14.5px}
+  .section-head{max-width:680px;margin-bottom:30px}
+  .section-head h2{font-size:clamp(26px,4vw,36px);margin:0 0 12px}
+  .section-head p{color:var(--text-dim);font-size:16px;margin:0}
+
+  .steps{counter-reset:step;display:grid;gap:18px}
+  .step{display:flex;gap:18px;align-items:flex-start}
+  .step .n{counter-increment:step;flex:0 0 auto;width:38px;height:38px;border-radius:10px;background:var(--accent);color:#1a1206;display:grid;place-items:center;font-family:var(--mono);font-weight:800}
+  .step .n::before{content:counter(step)}
+  .step h3{margin:2px 0 5px;font-size:17px}
+  .step p{margin:0;color:var(--text-dim);font-size:14.5px}
+
+  details{border:1px solid var(--line);border-radius:12px;background:var(--bg-card);margin-bottom:12px;overflow:hidden}
+  details summary{padding:18px 20px;cursor:pointer;font-weight:600;list-style:none;display:flex;justify-content:space-between;gap:14px;align-items:center}
+  details summary::-webkit-details-marker{display:none}
+  details summary::after{content:"+";color:var(--accent);font-size:22px;font-weight:400;transition:.2s}
+  details[open] summary::after{transform:rotate(45deg)}
+  details .a{padding:0 20px 18px;color:var(--text-dim);font-size:14.5px}
+
+  table.conv{width:100%;border-collapse:collapse;font-size:14px}
+  table.conv th,table.conv td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line-soft)}
+  table.conv th{color:var(--text-faint);font-family:var(--mono);font-weight:500;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+  table.conv td{font-family:var(--mono);color:var(--text-dim)}
+  table.conv tr:hover td{color:var(--text)}
+
+  footer{border-top:1px solid var(--line-soft);padding:40px 0 90px;margin-top:30px;color:var(--text-faint);font-size:13.5px}
+  .foot-inner{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:center}
+
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <div class="brand"><span class="glyph">T</span>TrueScale</div>
+    <nav class="nav-links" id="navLinks">
+      <a href="#tool">Ruler</a>
+      <a href="#how">How it works</a>
+      <a href="#calibrate-info">Calibration</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <button class="menu-btn" id="menuBtn" aria-label="Toggle menu" aria-expanded="false" aria-controls="navLinks">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  </div>
+</header>
+
+<main>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Online Ruler · Actual Size</p>
+      <h1>A ruler on your screen that's&nbsp;actually accurate.</h1>
+      <p class="lead">Measure any real object in centimetres or inches, right in your browser. Calibrate once with a credit card and TrueScale maps the on-screen scale to true physical units — no install, no sign-up, works offline.</p>
+      <div class="cta-row">
+        <a href="#tool" class="btn btn-primary">Open the ruler →</a>
+        <button class="btn btn-ghost" id="heroCalibrate">Calibrate my screen</button>
+      </div>
+      <div class="trust">
+        <span><i class="dot"></i> 100% client-side</span>
+        <span><i class="dot"></i> Accurate to ±1&nbsp;mm</span>
+        <span><i class="dot"></i> cm &amp; inches</span>
+        <span><i class="dot"></i> Works offline</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- TOOL -->
+  <section class="tool-section" id="tool">
+    <div class="wrap">
+      <div class="panel">
+        <div class="toolbar">
+          <div class="seg" role="group" aria-label="Measurement unit">
+            <button id="unitCm" aria-pressed="true">Centimetres</button>
+            <button id="unitIn" aria-pressed="false">Inches</button>
+          </div>
+          <div class="spacer"></div>
+          <span class="cal-flag" id="calFlag" aria-live="polite"><i class="pip"></i><span id="calFlagText">Uncalibrated — readings approximate</span></span>
+          <button class="tool-btn" id="openCalibrate" aria-haspopup="dialog">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18M3 12h18M3 17h18"/></svg>
+            Calibrate
+          </button>
+          <button class="tool-btn" id="resetMarkers" title="Reset markers">Reset</button>
+        </div>
+
+        <div class="readout" id="readout" role="status" aria-live="polite" aria-atomic="true">
+          <div class="primary"><span id="primaryVal">0.00</span><span class="u" id="primaryUnit">cm</span></div>
+          <div class="secondary">
+            <span><b id="secVal">0.000</b> <span id="secUnit">in</span></span>
+            <span><b id="mmVal">0.0</b> mm</span>
+          </div>
+        </div>
+
+        <div class="ruler-stage">
+          <div class="ruler-host" id="rulerHost">
+            <svg id="rulerSvg" aria-hidden="true" preserveAspectRatio="xMinYMin meet"></svg>
+            <div class="caliper-span" id="caliperSpan"></div>
+            <div class="marker" id="markerA" tabindex="0" role="slider" aria-label="Marker A position in millimetres" aria-valuemin="0" aria-valuenow="0">
+              <div class="stem"></div><div class="jaw">A</div><div class="badge" id="badgeA">0 mm</div>
+            </div>
+            <div class="marker" id="markerB" tabindex="0" role="slider" aria-label="Marker B position in millimetres" aria-valuemin="0" aria-valuenow="0">
+              <div class="stem"></div><div class="jaw">B</div><div class="badge" id="badgeB">0 mm</div>
+            </div>
+          </div>
+          <p class="hint">Drag jaw <b>A</b> and <b>B</b> to span your object. Keyboard: focus a jaw, then ← → (1&nbsp;mm) or Shift+← → (10&nbsp;mm).</p>
+        </div>
+      </div>
+
+      <!-- Leaderboard ad: fixed 728x90 reserved space prevents layout shift (CLS). -->
+      <div class="ad-slot ad-leader" aria-hidden="true">
+        <span class="ad-ph">Advertisement</span>
+        <ins class="adsbygoogle" style="display:inline-block;width:728px;height:90px"
+             data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="0000000001"></ins>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="content">
+    <div class="wrap">
+      <div class="grid cols-3">
+        <div class="feature">
+          <div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l4 4L21 4"/></svg></div>
+          <h3>Accurate by calibration</h3>
+          <p>The scale is matched to a real ISO/IEC 7810 ID-1 card — 85.60&nbsp;mm wide — so a millimetre on screen is a millimetre in the world.</p>
+        </div>
+        <div class="feature">
+          <div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h7l-1 8 10-12h-7z"/></svg></div>
+          <h3>Zero friction</h3>
+          <p>Usable within two seconds of load. No account, no install, and once cached it keeps working with no connection at all.</p>
+        </div>
+        <div class="feature">
+          <div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
+          <h3>Private by design</h3>
+          <p>Everything runs in your browser. Nothing you measure ever leaves your device — there is no backend to send it to.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="content" id="how">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">How it works</p>
+        <h2>Three steps to a true-size measurement</h2>
+        <p>A CSS pixel isn't a fixed physical length — it changes with every screen. Calibration is what turns this from a rough guide into a real ruler.</p>
+      </div>
+      <div class="steps">
+        <div class="step"><div class="n"></div><div><h3>Calibrate with any card</h3><p>Open calibration and resize the outline until a real credit, debit, or ID card matches it exactly. Every such card is 85.60&nbsp;mm wide, so this fixes your screen's true scale. On phones, match the card's short edge instead.</p></div></div>
+        <div class="step"><div class="n"></div><div><h3>Place your object on the ruler</h3><p>Hold the object flat against the screen, lined up with the scale. The ticks are redrawn from your calibration, so they're physically correct at any zoom or orientation.</p></div></div>
+        <div class="step"><div class="n"></div><div><h3>Drag the caliper jaws</h3><p>Slide markers A and B to the edges of your object. The live readout shows the distance in your chosen unit, with the other units beneath it.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CALIBRATION EXPLAINER + CONVERSION -->
+  <section class="content" id="calibrate-info">
+    <div class="wrap">
+      <div class="grid cols-2">
+        <div>
+          <p class="eyebrow">Why calibrate</p>
+          <h2 style="font-size:clamp(24px,3.5vw,30px);margin:0 0 14px">The pixel problem</h2>
+          <p style="color:var(--text-dim);margin:0 0 14px">Browsers assume a notional 96 pixels per inch, but the real size of a pixel depends on your display's density and device-pixel-ratio. A naïve ruler drawn at 96px&nbsp;=&nbsp;1in is wrong on most phones and many monitors.</p>
+          <p style="color:var(--text-dim);margin:0">TrueScale solves this with one number — <b style="color:var(--text);font-family:var(--mono)">pxPerMm</b>, the CSS pixels that equal one real millimetre on your display. Match the card once and that value drives every tick and every reading. It's stored in your browser, so returning visitors keep their calibration.</p>
+        </div>
+        <div>
+          <p class="eyebrow">Quick reference</p>
+          <h2 style="font-size:clamp(24px,3.5vw,30px);margin:0 0 14px">cm ⇄ inch conversions</h2>
+          <table class="conv">
+            <thead><tr><th>Centimetres</th><th>Inches</th><th>Millimetres</th></tr></thead>
+            <tbody>
+              <tr><td>1 cm</td><td>0.394 in</td><td>10 mm</td></tr>
+              <tr><td>2.54 cm</td><td>1 in</td><td>25.4 mm</td></tr>
+              <tr><td>5 cm</td><td>1.969 in</td><td>50 mm</td></tr>
+              <tr><td>10 cm</td><td>3.937 in</td><td>100 mm</td></tr>
+              <tr><td>30 cm</td><td>11.81 in</td><td>300 mm</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="content" id="faq">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">FAQ</p>
+        <h2>Common questions</h2>
+      </div>
+      <details open><summary>How accurate is an on-screen ruler?</summary><div class="a">After calibrating with a standard card, TrueScale is accurate to roughly ±1&nbsp;mm — tighter than the eye can judge against a screen. Without calibration it falls back to a 96&nbsp;PPI estimate and is clearly flagged as approximate.</div></details>
+      <details><summary>Do I need a credit card to calibrate?</summary><div class="a">Any ISO/IEC 7810 ID-1 card works — credit, debit, ID, membership, or transit cards are all exactly 85.60&nbsp;mm wide. You can also enter your screen's PPI directly if you know it.</div></details>
+      <details><summary>Does it work on phones?</summary><div class="a">Yes. A full card is wider than most phone screens, so on a narrow display switch calibration to the card's short edge (53.98&nbsp;mm), which fits. Drag, touch, and pen input are all supported, and the ruler redraws correctly when you rotate.</div></details>
+      <details><summary>Is my data collected?</summary><div class="a">No personal data is collected and nothing you measure is uploaded. Your calibration is saved only in your own browser's local storage and never sent anywhere.</div></details>
+      <details><summary>Will my calibration be remembered?</summary><div class="a">Yes. It's stored locally and reused on every visit. If TrueScale detects you may have switched device or display, it will gently suggest re-calibrating — and you can re-open calibration any time.</div></details>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot-inner">
+    <div><span class="brand" style="font-size:15px"><span class="glyph" style="width:22px;height:22px;font-size:13px">T</span>TrueScale</span></div>
+    <div>Free online ruler · cm &amp; inches · © 2026 TrueScale</div>
+  </div>
+</footer>
+
+<!-- Anchor ad (accessible: labelled complementary region, focusable dismiss) -->
+<aside class="ad-slot ad-anchor" id="anchorAd" role="complementary" aria-label="Advertisement">
+  <span class="ad-ph">Advertisement</span>
+  <ins class="adsbygoogle" style="display:inline-block;width:320px;height:50px"
+       data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="0000000002"></ins>
+  <button class="close" id="closeAnchor" aria-label="Dismiss advertisement">×</button>
+</aside>
+
+<!-- CALIBRATION DIALOG -->
+<dialog id="calDialog" aria-labelledby="calTitle">
+  <div class="dlg-head">
+    <h3 id="calTitle">Calibrate your screen</h3>
+    <p>Hold a credit, debit, or ID card against the screen and resize the outline until it matches the card exactly.</p>
+  </div>
+  <div class="dlg-body">
+    <div class="seg edge-toggle" role="group" aria-label="Which card edge to match">
+      <button id="edgeLong" aria-pressed="true">Long edge · 85.60 mm</button>
+      <button id="edgeShort" aria-pressed="false">Short edge · 53.98 mm</button>
+    </div>
+    <p class="edge-hint" id="edgeHint">Lay the card's long side against the outline. On a phone, use the short edge.</p>
+    <div class="card-strip" id="cardStrip">
+      <div class="credit-card" id="calCard">
+        <span class="cc-dim" id="ccDim">85.60 mm</span>
+        <div class="resize-handle" id="resizeHandle" title="Drag to resize"></div>
+      </div>
+    </div>
+    <div class="slider-row">
+      <label for="calSlider">Fine adjust</label>
+      <input type="range" id="calSlider" min="120" max="900" step="1" value="324" aria-label="Adjust outline width to match your card" />
+      <span class="ppi-readout"><b id="ppiVal">96</b> PPI</span>
+    </div>
+    <div class="ppi-entry">
+      Know your PPI? Enter it:
+      <input type="number" id="ppiInput" min="40" max="900" step="1" placeholder="e.g. 218" aria-label="Enter screen PPI directly" />
+    </div>
+  </div>
+  <div class="dlg-foot">
+    <button class="btn btn-ghost" id="calCancel">Cancel</button>
+    <button class="btn btn-primary" id="calSave">Save calibration</button>
+  </div>
+</dialog>
+
+<!-- SEO: structured data -->
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+ {"@type":"WebApplication","name":"TrueScale","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"A browser-based, calibrated on-screen ruler that measures physical objects in centimetres and inches."},
+ {"@type":"FAQPage","mainEntity":[
+  {"@type":"Question","name":"How accurate is an on-screen ruler?","acceptedAnswer":{"@type":"Answer","text":"After calibrating with a standard card, TrueScale is accurate to roughly ±1 mm. Without calibration it falls back to a 96 PPI estimate and is flagged as approximate."}},
+  {"@type":"Question","name":"Do I need a credit card to calibrate?","acceptedAnswer":{"@type":"Answer","text":"Any ISO/IEC 7810 ID-1 card works — credit, debit, ID, membership or transit cards are all exactly 85.60 mm wide. You can also enter your screen's PPI directly."}},
+  {"@type":"Question","name":"Does it work on phones?","acceptedAnswer":{"@type":"Answer","text":"Yes. A full card is wider than most phone screens, so switch calibration to the card's short edge (53.98 mm), which fits. Touch and pen input are supported."}},
+  {"@type":"Question","name":"Is my data collected?","acceptedAnswer":{"@type":"Answer","text":"No personal data is collected and nothing you measure is uploaded. Calibration is saved only in your browser's local storage."}}
+ ]}
+]}
+</script>
+
+<script>
+(function(){
+  "use strict";
+  var CARD_LONG_MM = 85.60;     // ISO/IEC 7810 ID-1 width
+  var CARD_SHORT_MM = 53.98;    // ID-1 height
+  var MM_PER_IN = 25.4;
+  var DEFAULT_PXPERMM = 96 / 25.4;
+  var pxPerMm = DEFAULT_PXPERMM;
+  var calibrated = false;
+  var unit = "cm";
+
+  // restore
+  try {
+    var stored = localStorage.getItem("pxPerMm");
+    if (stored) { pxPerMm = parseFloat(stored); calibrated = true; }
+    var su = localStorage.getItem("unit");
+    if (su === "in" || su === "cm") unit = su;
+    var sdpr = parseFloat(localStorage.getItem("dpr") || "0");
+    if (calibrated && sdpr && Math.abs(sdpr - window.devicePixelRatio) > 0.01) {
+      setTimeout(function(){ flagApprox("Display changed — re-calibrate for accuracy"); }, 600);
+    }
+  } catch(e){}
+
+  var $ = function(id){ return document.getElementById(id); };
+  var host = $("rulerHost"), svg = $("rulerSvg");
+  var mA = $("markerA"), mB = $("markerB");
+  var badgeA = $("badgeA"), badgeB = $("badgeB"), span = $("caliperSpan");
+  var posA = 0, posB = 0;
+
+  // ---------- Ruler rendering ----------
+  var SVGNS = "http://www.w3.org/2000/svg";
+  function el(name, attrs){ var n = document.createElementNS(SVGNS, name); for (var k in attrs) n.setAttribute(k, attrs[k]); return n; }
+  function label(x,y,val){ var t=el("text",{x:x,y:y,"class":"tick-label"}); t.textContent=val; return t; }
+
+  function render(){
+    var w = host.clientWidth, h = host.clientHeight;
+    svg.setAttribute("viewBox", "0 0 " + w + " " + h);
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    var baseY = h - 22;
+    svg.appendChild(el("line",{x1:0,y1:baseY,x2:w,y2:baseY,"class":"baseline"}));
+
+    if (unit === "cm") {
+      var total = Math.floor(w / pxPerMm);
+      for (var mm=0; mm<=total; mm++){
+        var x = mm * pxPerMm;
+        var len = (mm%10===0)?46 : (mm%5===0)?30 : 18;
+        var cls = (mm%10===0)?"tick major" : (mm%5===0)?"tick medium" : "tick";
+        svg.appendChild(el("line",{x1:x,y1:baseY,x2:x,y2:baseY-len,"class":cls}));
+        if (mm%10===0) svg.appendChild(label(x+3, baseY-len+12, mm/10));
+      }
+    } else {
+      var pxIn = pxPerMm * MM_PER_IN, sixteenth = pxIn/16;
+      var totalSix = Math.floor(w / sixteenth);
+      for (var s=0; s<=totalSix; s++){
+        var xx = s * sixteenth, len2, cls2;
+        if (s%16===0){ len2=46; cls2="tick major"; }
+        else if (s%8===0){ len2=34; cls2="tick medium"; }
+        else if (s%4===0){ len2=28; cls2="tick medium"; }
+        else if (s%2===0){ len2=22; cls2="tick"; }
+        else { len2=16; cls2="tick"; }
+        svg.appendChild(el("line",{x1:xx,y1:baseY,x2:xx,y2:baseY-len2,"class":cls2}));
+        if (s%16===0) svg.appendChild(label(xx+3, baseY-len2+12, s/16));
+      }
+    }
+    clampMarkers();
+    placeMarkers();
+  }
+
+  // ---------- Markers ----------
+  function clampMarkers(){
+    var w = host.clientWidth;
+    posA = Math.max(0, Math.min(w, posA));
+    posB = Math.max(0, Math.min(w, posB));
+  }
+  function placeMarkers(){
+    mA.style.left = posA + "px";
+    mB.style.left = posB + "px";
+    var lo = Math.min(posA,posB), hi = Math.max(posA,posB);
+    span.style.left = lo + "px";
+    span.style.width = (hi-lo) + "px";
+    var mmA = posA / pxPerMm, mmB = posB / pxPerMm;
+    badgeA.textContent = fmtSmall(mmA);
+    badgeB.textContent = fmtSmall(mmB);
+    mA.setAttribute("aria-valuenow", mmA.toFixed(1));
+    mB.setAttribute("aria-valuenow", mmB.toFixed(1));
+    var maxMm = (host.clientWidth/pxPerMm).toFixed(0);
+    mA.setAttribute("aria-valuemax", maxMm);
+    mB.setAttribute("aria-valuemax", maxMm);
+    updateReadout();
+  }
+  function fmtSmall(mm){ return unit==="cm" ? (mm/10).toFixed(1)+" cm" : (mm/MM_PER_IN).toFixed(2)+" in"; }
+  function updateReadout(){
+    var mm = Math.abs(posB - posA) / pxPerMm;
+    var cm = mm/10, inch = mm/MM_PER_IN;
+    if (unit==="cm"){
+      $("primaryVal").textContent = cm.toFixed(2); $("primaryUnit").textContent = "cm";
+      $("secVal").textContent = inch.toFixed(3); $("secUnit").textContent="in";
+    } else {
+      $("primaryVal").textContent = inch.toFixed(3); $("primaryUnit").textContent = "in";
+      $("secVal").textContent = cm.toFixed(2); $("secUnit").textContent="cm";
+    }
+    $("mmVal").textContent = mm.toFixed(1);
+  }
+
+  function dragify(marker, getPos, setPos){
+    marker.addEventListener("pointerdown", function(e){
+      marker.setPointerCapture(e.pointerId); marker.focus();
+      var rect = host.getBoundingClientRect();
+      function move(ev){ setPos(ev.clientX - rect.left); clampMarkers(); placeMarkers(); }
+      function up(){ marker.removeEventListener("pointermove", move); marker.removeEventListener("pointerup", up); }
+      move(e);
+      marker.addEventListener("pointermove", move);
+      marker.addEventListener("pointerup", up);
+      e.preventDefault();
+    });
+    marker.addEventListener("keydown", function(e){
+      var step = (e.shiftKey?10:1) * pxPerMm, p = getPos();
+      if (e.key==="ArrowRight"||e.key==="ArrowUp") setPos(p+step);
+      else if (e.key==="ArrowLeft"||e.key==="ArrowDown") setPos(p-step);
+      else if (e.key==="Home") setPos(0);
+      else if (e.key==="End") setPos(host.clientWidth);
+      else return;
+      clampMarkers(); placeMarkers(); e.preventDefault();
+    });
+  }
+  dragify(mA, function(){return posA;}, function(v){posA=v;});
+  dragify(mB, function(){return posB;}, function(v){posB=v;});
+
+  function defaultMarkers(){
+    var w = host.clientWidth;
+    posA = Math.round(w*0.15);
+    posB = posA + pxPerMm*45;
+    if (posB > w) posB = Math.round(w*0.7);
+    clampMarkers(); placeMarkers();
+  }
+
+  // ---------- Unit toggle ----------
+  function setUnit(u){
+    unit = u;
+    $("unitCm").setAttribute("aria-pressed", u==="cm");
+    $("unitIn").setAttribute("aria-pressed", u==="in");
+    try{ localStorage.setItem("unit", u); }catch(e){}
+    render();
+  }
+  $("unitCm").addEventListener("click", function(){ setUnit("cm"); });
+  $("unitIn").addEventListener("click", function(){ setUnit("in"); });
+  $("resetMarkers").addEventListener("click", defaultMarkers);
+
+  // ---------- Calibration flag ----------
+  function flagOk(){ $("calFlag").classList.remove("approx"); $("calFlagText").textContent = "Calibrated · " + (pxPerMm*MM_PER_IN).toFixed(0) + " PPI"; }
+  function flagApprox(msg){ $("calFlag").classList.add("approx"); $("calFlagText").textContent = msg || "Uncalibrated — readings approximate"; }
+  if (calibrated) flagOk(); else flagApprox();
+
+  // ---------- Calibration dialog ----------
+  var dlg = $("calDialog"), slider = $("calSlider"), card = $("calCard"), strip = $("cardStrip");
+  var ppiVal = $("ppiVal"), ppiInput = $("ppiInput"), ccDim = $("ccDim");
+  var activeMM = CARD_LONG_MM;
+  var workingPxPerMm = pxPerMm;
+
+  function setCardWidth(widthPx, fromSlider){
+    widthPx = Math.max(80, widthPx);
+    card.style.width = widthPx + "px";
+    workingPxPerMm = widthPx / activeMM;
+    ppiVal.textContent = (workingPxPerMm*MM_PER_IN).toFixed(0);
+    if (!fromSlider){
+      var clamped = Math.max(parseFloat(slider.min), Math.min(parseFloat(slider.max), widthPx));
+      slider.value = clamped;
+    }
+  }
+  function syncCardFromSlider(){ setCardWidth(parseFloat(slider.value), true); ppiInput.value=""; }
+  slider.addEventListener("input", syncCardFromSlider);
+
+  ppiInput.addEventListener("input", function(){
+    var ppi = parseFloat(ppiInput.value);
+    if (ppi>=40 && ppi<=900){
+      workingPxPerMm = ppi / MM_PER_IN;
+      setCardWidth(workingPxPerMm * activeMM, false);
+      ppiVal.textContent = ppi.toFixed(0);
+    }
+  });
+
+  function setEdge(mm, isLong){
+    // keep the current outline width; the physical reference changes, so pxPerMm changes.
+    activeMM = mm;
+    $("edgeLong").setAttribute("aria-pressed", isLong);
+    $("edgeShort").setAttribute("aria-pressed", !isLong);
+    ccDim.textContent = mm.toFixed(2) + " mm";
+    setCardWidth(parseFloat(card.style.width) || parseFloat(slider.value), false);
+    ppiInput.value="";
+  }
+  $("edgeLong").addEventListener("click", function(){ setEdge(CARD_LONG_MM, true); });
+  $("edgeShort").addEventListener("click", function(){ setEdge(CARD_SHORT_MM, false); });
+
+  // drag the card's right edge to resize
+  (function(){
+    var handle = $("resizeHandle");
+    handle.addEventListener("pointerdown", function(e){
+      handle.setPointerCapture(e.pointerId);
+      var cardLeft = card.getBoundingClientRect().left + strip.scrollLeft;
+      function move(ev){ setCardWidth((ev.clientX + strip.scrollLeft) - cardLeft, false); ppiInput.value=""; }
+      function up(){ handle.removeEventListener("pointermove", move); handle.removeEventListener("pointerup", up); }
+      handle.addEventListener("pointermove", move);
+      handle.addEventListener("pointerup", up);
+      e.preventDefault(); e.stopPropagation();
+    });
+  })();
+
+  function openCal(){
+    slider.max = Math.max(900, Math.round(window.innerWidth));
+    activeMM = CARD_LONG_MM;
+    $("edgeLong").setAttribute("aria-pressed", true);
+    $("edgeShort").setAttribute("aria-pressed", false);
+    ccDim.textContent = CARD_LONG_MM.toFixed(2) + " mm";
+    setCardWidth(pxPerMm * activeMM, false);
+    closeMenu();
+    if (typeof dlg.showModal === "function") dlg.showModal(); else dlg.setAttribute("open","");
+  }
+  function closeCal(){ if (dlg.open){ dlg.close ? dlg.close() : dlg.removeAttribute("open"); } }
+  $("openCalibrate").addEventListener("click", openCal);
+  $("heroCalibrate").addEventListener("click", openCal);
+  $("calCancel").addEventListener("click", closeCal);
+  $("calSave").addEventListener("click", function(){
+    pxPerMm = workingPxPerMm; calibrated = true;
+    try{ localStorage.setItem("pxPerMm", pxPerMm); localStorage.setItem("dpr", window.devicePixelRatio); }catch(e){}
+    flagOk(); render(); closeCal();
+  });
+
+  // ---------- Mobile nav ----------
+  var navLinks = $("navLinks"), menuBtn = $("menuBtn");
+  function closeMenu(){ navLinks.classList.remove("open"); menuBtn.setAttribute("aria-expanded","false"); }
+  menuBtn.addEventListener("click", function(){
+    var open = navLinks.classList.toggle("open");
+    menuBtn.setAttribute("aria-expanded", open);
+  });
+  navLinks.addEventListener("click", function(e){ if (e.target.tagName==="A") closeMenu(); });
+
+  // ---------- Anchor ad dismiss ----------
+  $("closeAnchor").addEventListener("click", function(){ $("anchorAd").style.display="none"; });
+
+  // ---------- Resize handling (debounced) ----------
+  var rt;
+  function onResize(){ clearTimeout(rt); rt=setTimeout(render, 120); }
+  window.addEventListener("resize", onResize);
+  window.addEventListener("orientationchange", onResize);
+
+  // ---------- Ads (request fill for reserved slots; never throws if loader is blocked) ----------
+  try {
+    var insts = document.querySelectorAll("ins.adsbygoogle");
+    for (var i=0;i<insts.length;i++){ (window.adsbygoogle = window.adsbygoogle || []).push({}); }
+  } catch(e){}
+
+  // ---------- Init ----------
+  render(); defaultMarkers();
+
+  // ---------- Service worker (offline) ----------
+  if ("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
+    window.addEventListener("load", function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); });
+  }
+})();
+</script>
+</body>
+</html>

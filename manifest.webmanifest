@@ -1,0 +1,14 @@
+{
+  "name": "TrueScale — Online Ruler",
+  "short_name": "TrueScale",
+  "description": "An accurate, calibrated on-screen ruler. Measure real objects in cm and inches, fully in your browser.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0d0e12",
+  "theme_color": "#0d0e12",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
