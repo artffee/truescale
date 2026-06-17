@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://truescale.vercel.app/sitemap.xml
+Sitemap: https://ruleler.vercel.app/sitemap.xml
