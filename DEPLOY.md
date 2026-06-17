@@ -4,7 +4,7 @@ Static site — no build step. Upload the repo to any static host (Netlify, Clou
 
 ## 1. Your domain
 
-Replace `https://truescale.app/` with your real URL (keep the trailing slash) in:
+Replace `https://truescale.vercel.app/` with your real URL (keep the trailing slash) in:
 
 | File | Where |
 |------|-------|
